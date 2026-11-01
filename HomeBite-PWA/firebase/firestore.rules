@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signedIn(){return request.auth != null;}
+  function owner(){return signedIn() && request.auth.token.email == 'dyuvan2013@gmail.com' && request.auth.token.email_verified == true;}
+  function approvedCook(){return signedIn() && exists(/databases/$(database)/documents/cooks/$(request.auth.uid)) && get(/databases/$(database)/documents/cooks/$(request.auth.uid)).data.status == 'approved';}
+  match /cooks/{uid} {
+   allow create: if signedIn() && request.auth.uid == uid && request.resource.data.status == 'pending';
+   allow read: if owner() || (signedIn() && request.auth.uid == uid);
+   allow update, delete: if owner();
+  }
+  match /foods/{id} {
+   allow read: if resource.data.status == 'published' || owner() || (signedIn() && resource.data.cookId == request.auth.uid);
+   allow create: if approvedCook() && request.resource.data.cookId == request.auth.uid && request.resource.data.status == 'pending';
+   allow update, delete: if owner() || (approvedCook() && resource.data.cookId == request.auth.uid && request.resource.data.cookId == request.auth.uid);
+  }
+  match /orders/{id} {
+   allow create: if signedIn() && request.resource.data.customerId == request.auth.uid && request.resource.data.status == 'placed';
+   allow read: if owner() || (signedIn() && (resource.data.customerId == request.auth.uid || resource.data.cookId == request.auth.uid));
+   allow update: if owner() || (approvedCook() && resource.data.cookId == request.auth.uid && request.resource.data.customerId == resource.data.customerId);
+   allow delete: if owner();
+  }
+  match /commissionSettings/{id} { allow read: if signedIn(); allow write: if owner(); }
+  match /payouts/{id} { allow read: if owner() || (signedIn() && resource.data.cookId == request.auth.uid); allow write: if false; }
+ }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "HomeBite - Homemade Food Marketplace",
+  "short_name": "HomeBite",
+  "description": "Discover homemade food from local home cooks.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fffdfa",
+  "theme_color": "#ed6b3b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
